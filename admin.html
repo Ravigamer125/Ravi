@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Free Fire Tournaments — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg-primary:   #F8FAFC;
+        --bg-secondary: #E2E8F0;
+        --text-dark:    #1E293B;
+        --accent-blue:  #2563EB;
+        --accent-gold:  #FBBF24;
+        --accent-red:   #DC2626;
+        --border:       #CBD5E1;
+        --radius: 14px;
+      }
+      html, body { height: 100%; margin: 0; background: var(--bg-primary); color: var(--text-dark); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+      .app { max-width: 980px; margin: 0 auto; min-height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; }
+      header { position: sticky; top: 0; z-index: 20; background: white; border-bottom: 1px solid var(--border); }
+      .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+      .brand { display: flex; align-items: center; gap: 10px; }
+      .brand-title { font-family: "Russo One"; font-size: 18px; }
+      .user { display: flex; align-items: center; gap: 10px; }
+      .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-secondary); display: grid; place-items: center; font-weight: 800; }
+
+      .nav { position: sticky; bottom: 0; background: white; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(5, 1fr); }
+      .nav-btn { padding: 10px 4px; background: transparent; border: none; font-weight: 700; }
+      .nav-btn.active { color: var(--accent-blue); }
+
+      .content { padding: 12px; display: grid; gap: 12px; }
+      .grid { display: grid; gap: 10px; }
+      .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+      @media (max-width: 720px){ .grid.cols-2 { grid-template-columns: 1fr; } }
+
+      .card { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+      .card-title { font-weight: 800; margin-bottom: 6px; }
+      .meta { color: #475569; font-size: 12px; }
+      .btn { appearance: none; border: none; background: var(--accent-blue); color: white; padding: 10px 12px; border-radius: 12px; font-weight: 700; }
+      .btn.ghost { background: transparent; color: var(--text-dark); border: 1px solid var(--border); }
+      .btn.warn { background: var(--accent-red); }
+
+      .table { width: 100%; border-collapse: collapse; }
+      .table th, .table td { text-align: left; padding: 10px; border-bottom: 1px solid var(--bg-secondary); }
+
+      .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      @media (min-width: 680px){ .kpis { grid-template-columns: repeat(4, 1fr); } }
+      .kpi { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+      .kpi .label { font-size: 12px; color: #475569; }
+      .kpi .value { font-size: 20px; font-weight: 800; }
+
+      /* Modal */
+      .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.5); display: none; align-items: end; justify-content: center; z-index: 50; }
+      .modal { background: white; width: 100%; max-width: 980px; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 16px; border: 1px solid var(--border); }
+      .modal.show { display: flex; }
+      .row { display: grid; gap: 8px; margin: 8px 0; }
+      .input { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--border); }
+      .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+      @media (max-width: 720px){ .grid.cols-3 { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header>
+        <div class="topbar">
+          <div class="brand">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 12l4-8 4 8-4 8-4-8zm10 0l4-8 4 8-4 8-4-8z" fill="currentColor"/></svg>
+            <div class="brand-title">Admin Panel</div>
+          </div>
+          <div class="user">
+            <div class="meta">Role: <span id="role">Owner</span></div>
+            <div class="avatar" id="avatar">AD</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- Dashboard -->
+        <section id="view-dashboard" data-view>
+          <div class="kpis">
+            <div class="kpi"><div class="label">Total Tournaments</div><div class="value" id="kpiTourn">0</div></div>
+            <div class="kpi"><div class="label">Total Players</div><div class="value" id="kpiPlayers">0</div></div>
+            <div class="kpi"><div class="label">Online Players</div><div class="value" id="kpiOnline">0</div></div>
+            <div class="kpi"><div class="label">Wallet Balance Held</div><div class="value" id="kpiHeld">₹0</div></div>
+          </div>
+
+          <div class="grid cols-2">
+            <div class="card">
+              <div class="card-title">Quick Actions</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn" id="btnCreateT">Create Tournament</button>
+                <button class="btn ghost" id="btnViewPayments">View Payments</button>
+                <button class="btn ghost" id="btnNotify">Send Notification</button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Active Players</div>
+              <div id="gauge" style="height:140px;display:grid;place-items:center;">0</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Revenue & Signups</div>
+            <canvas id="chartRevenue" height="140"></canvas>
+          </div>
+        </section>
+
+        <!-- Tournaments -->
+        <section id="view-tournaments" data-view hidden>
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div class="card-title">Tournaments</div>
+              <div style="display:flex;gap:8px;">
+                <input id="searchT" class="input" placeholder="Search by title" />
+                <select id="filterStatus" class="input" style="max-width:160px;">
+                  <option value="">All</option>
+                  <option value="live">Live</option>
+                  <option value="upcoming">Upcoming</option>
+                  <option value="past">Past</option>
+                </select>
+                <button class="btn" id="btnCreateT2">Create</button>
+              </div>
+            </div>
+            <table class="table" id="tTable">
+              <thead>
+                <tr><th>Title</th><th>Time</th><th>Map</th><th>Prize</th><th>Entry</th><th>Players</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Players -->
+        <section id="view-players" data-view hidden>
+          <div class="card">
+            <div class="card-title">Players</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <input id="searchP" class="input" placeholder="Search name/UID/email" />
+            </div>
+            <table class="table" id="pTable">
+              <thead>
+                <tr><th>Name</th><th>FF UID</th><th>Email</th><th>Wallet</th><th>Referrer</th><th></th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Analytics -->
+        <section id="view-analytics" data-view hidden>
+          <div class="grid cols-2">
+            <div class="card">
+              <div class="card-title">Daily Sign-ups</div>
+              <canvas id="chartSignups" height="140"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-title">Referrals Redeemed</div>
+              <canvas id="chartReferrals" height="140"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings -->
+        <section id="view-settings" data-view hidden>
+          <div class="grid cols-3">
+            <div class="card">
+              <div class="card-title">Payment Gateway</div>
+              <div class="row">
+                <label>Provider</label>
+                <select id="payProvider" class="input"><option>Razorpay</option><option>Stripe</option></select>
+                <label>Public Key</label>
+                <input id="payPublic" class="input" placeholder="pk_live_xxx" />
+                <label>Secret Key</label>
+                <input id="paySecret" class="input" placeholder="sk_live_xxx" />
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Referral Rules</div>
+              <div class="row">
+                <label>Signup Bonus</label>
+                <input id="refSignup" type="number" class="input" placeholder="20" />
+                <label>Referrer Bonus</label>
+                <input id="refReferrer" type="number" class="input" placeholder="30" />
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Admin Users & Roles</div>
+              <div class="row">
+                <input class="input" placeholder="Add admin email" />
+                <button class="btn">Invite</button>
+              </div>
+              <div id="adminUsers" class="meta">owner@site.com (Owner)</div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <nav class="nav">
+        <button class="nav-btn active" data-view-target="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view-target="tournaments">Tournaments</button>
+        <button class="nav-btn" data-view-target="players">Players</button>
+        <button class="nav-btn" data-view-target="analytics">Analytics</button>
+        <button class="nav-btn" data-view-target="settings">Settings</button>
+      </nav>
+
+      <!-- Create/Edit Tournament Modal -->
+      <div class="modal-backdrop" id="tModal">
+        <div class="modal">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:800;" id="tModalTitle">Create Tournament</div>
+            <button class="btn ghost" data-close-t>Close</button>
+          </div>
+          <div class="grid cols-3">
+            <div class="row"><label>Title</label><input id="fTitle" class="input" /></div>
+            <div class="row"><label>Date/Time</label><input id="fTime" type="datetime-local" class="input" /></div>
+            <div class="row"><label>Map</label><input id="fMap" class="input" /></div>
+            <div class="row"><label>Prize Pool</label><input id="fPrize" type="number" class="input" /></div>
+            <div class="row"><label>Entry Fee</label><input id="fEntry" type="number" class="input" /></div>
+            <div class="row"><label>Room ID</label><input id="fRoom" class="input" /></div>
+            <div class="row"><label>Room Pass</label><input id="fPass" class="input" /></div>
+            <div class="row"><label>Max Players</label><input id="fMax" type="number" class="input" /></div>
+            <div class="row"><label>Status</label><select id="fStatus" class="input"><option>live</option><option>upcoming</option><option>past</option></select></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn" id="btnSaveT">Save</button>
+            <button class="btn warn" id="btnDeleteT">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Mock state & placeholders ---
+      const state = {
+        tournaments: [
+          { id: 't1', title: 'Daily Clash #201', matchTime: new Date(Date.now()+3600000).toISOString(), map: 'Bermuda', prize: 1000, entryFee: 50, roomId: '12345', roomPass: 'abc', maxPlayers: 100, joined: 76, status: 'live' },
+          { id: 't2', title: 'Duo Faceoff', matchTime: new Date(Date.now()+3*3600000).toISOString(), map: 'Kalahari', prize: 800, entryFee: 40, roomId: '44444', roomPass: 'def', maxPlayers: 50, joined: 49, status: 'upcoming' },
+          { id: 't3', title: 'Pro League Qualifier', matchTime: new Date(Date.now()-24*3600000).toISOString(), map: 'Purgatory', prize: 3000, entryFee: 100, roomId: '77777', roomPass: 'ghi', maxPlayers: 100, joined: 100, status: 'past' }
+        ],
+        players: [
+          { id: 'u1', name: 'Rohan', uid: '987654321', email: 'rohan@example.com', walletBalance: 500, referrer: 'u9' },
+          { id: 'u2', name: 'Sara', uid: '112233445', email: 'sara@example.com', walletBalance: 120, referrer: null }
+        ],
+        editingId: null,
+        activeView: 'dashboard'
+      };
+
+      const $ = (s, r=document) => r.querySelector(s);
+      const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+      const currency = v => `₹${Number(v).toLocaleString('en-IN')}`;
+      const formatTime = iso => new Date(iso).toLocaleString();
+
+      // --- Dashboard ---
+      function renderKpis(){
+        $('#kpiTourn').textContent = state.tournaments.length;
+        $('#kpiPlayers').textContent = state.players.length;
+        $('#kpiOnline').textContent = Math.floor(Math.random()*20);
+        const held = state.tournaments.reduce((s,t)=> s + t.entryFee * t.joined, 0);
+        $('#kpiHeld').textContent = currency(held);
+        $('#gauge').textContent = `${Math.floor(Math.random()*100)} active`;
+      }
+
+      // --- Tournaments ---
+      function renderTournaments(){
+        const q = ($('#searchT').value||'').toLowerCase();
+        const status = $('#filterStatus').value;
+        const rows = state.tournaments.filter(t => (!q || t.title.toLowerCase().includes(q)) && (!status || t.status===status));
+        const tb = $('#tTable tbody'); tb.innerHTML = '';
+        for(const t of rows){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${t.title}</td>
+            <td>${formatTime(t.matchTime)}</td>
+            <td>${t.map}</td>
+            <td>${currency(t.prize)}</td>
+            <td>${currency(t.entryFee)}</td>
+            <td>${t.joined}/${t.maxPlayers}</td>
+            <td>${t.status}</td>
+            <td style="text-align:right">
+              <button class="btn ghost" data-edit="${t.id}">Edit</button>
+              <button class="btn warn" data-disable="${t.id}">Disable</button>
+            </td>`;
+          tr.querySelector('[data-edit]')?.addEventListener('click', ()=> openTModal(t.id));
+          tr.querySelector('[data-disable]')?.addEventListener('click', ()=> toggleDisable(t.id));
+          tb.appendChild(tr);
+        }
+      }
+
+      function openTModal(id=null){
+        state.editingId = id;
+        $('#tModalTitle').textContent = id? 'Edit Tournament' : 'Create Tournament';
+        const t = id? state.tournaments.find(x=>x.id===id) : { title:'', matchTime:'', map:'', prize:0, entryFee:0, roomId:'', roomPass:'', maxPlayers:100, status:'upcoming' };
+        $('#fTitle').value = t.title || '';
+        $('#fTime').value = t.matchTime? new Date(t.matchTime).toISOString().slice(0,16) : '';
+        $('#fMap').value = t.map || '';
+        $('#fPrize').value = t.prize || 0;
+        $('#fEntry').value = t.entryFee || 0;
+        $('#fRoom').value = t.roomId || '';
+        $('#fPass').value = t.roomPass || '';
+        $('#fMax').value = t.maxPlayers || 100;
+        $('#fStatus').value = t.status || 'upcoming';
+        $('#tModal').classList.add('show');
+      }
+      function closeTModal(){ $('#tModal').classList.remove('show'); }
+
+      function saveTournament(){
+        const data = {
+          title: $('#fTitle').value.trim(),
+          matchTime: new Date($('#fTime').value).toISOString(),
+          map: $('#fMap').value.trim(),
+          prize: Number($('#fPrize').value),
+          entryFee: Number($('#fEntry').value),
+          roomId: $('#fRoom').value.trim(),
+          roomPass: $('#fPass').value.trim(),
+          maxPlayers: Number($('#fMax').value),
+          status: $('#fStatus').value
+        };
+        if (state.editingId){
+          const idx = state.tournaments.findIndex(x=>x.id===state.editingId);
+          state.tournaments[idx] = { ...state.tournaments[idx], ...data };
+        } else {
+          state.tournaments.unshift({ id: 't'+Math.random().toString(36).slice(2,7), joined: 0, ...data });
+        }
+        // Backend placeholder:
+        // await db.collection('tournaments').doc(state.editingId||newId).set(data, { merge: true });
+        closeTModal();
+        renderTournaments();
+        renderKpis();
+      }
+
+      function deleteTournament(){
+        if (!state.editingId) return closeTModal();
+        const idx = state.tournaments.findIndex(x=>x.id===state.editingId);
+        if (idx!==-1) state.tournaments.splice(idx,1);
+        closeTModal();
+        renderTournaments();
+        renderKpis();
+      }
+      function toggleDisable(id){
+        const t = state.tournaments.find(x=>x.id===id);
+        if (!t) return;
+        t.status = t.status==='live' ? 'upcoming' : 'live';
+        renderTournaments();
+      }
+
+      // --- Players ---
+      function renderPlayers(){
+        const q = ($('#searchP').value||'').toLowerCase();
+        const rows = state.players.filter(p => !q || [p.name,p.uid,p.email].some(v=> (v||'').toLowerCase().includes(q)) );
+        const tb = $('#pTable tbody'); tb.innerHTML='';
+        for(const p of rows){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${p.name}</td>
+            <td>${p.uid}</td>
+            <td>${p.email||'-'}</td>
+            <td>${currency(p.walletBalance)}</td>
+            <td>${p.referrer||'-'}</td>
+            <td style="text-align:right"><button class="btn ghost" data-viewp="${p.id}">View</button></td>`;
+          tr.querySelector('[data-viewp]')?.addEventListener('click', ()=> alert('Player details placeholder'));
+          tb.appendChild(tr);
+        }
+      }
+
+      // --- Analytics (lightweight, no external deps) ---
+      function drawSparkline(canvasId, values, color){
+        const c = document.getElementById(canvasId); const ctx = c.getContext('2d');
+        const w = c.width = c.clientWidth; const h = c.height = c.clientHeight;
+        ctx.clearRect(0,0,w,h); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+        const max = Math.max(...values, 1);
+        values.forEach((v,i)=>{
+          const x = (i/(values.length-1)) * (w-8) + 4;
+          const y = h - (v/max) * (h-8) - 4;
+          if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        });
+        ctx.stroke();
+      }
+
+      // --- View switching ---
+      function switchView(view){
+        state.activeView = view;
+        $$('[data-view]').forEach(v=> v.hidden = true);
+        $(`#view-${view}`).hidden = false;
+        $$('.nav-btn').forEach(b=> b.classList.toggle('active', b.dataset.viewTarget===view));
+        if (view==='dashboard'){ renderKpis(); drawSparkline('chartRevenue', [2,5,3,8,6,9,10], '#2563EB'); }
+        if (view==='tournaments') renderTournaments();
+        if (view==='players') renderPlayers();
+        if (view==='analytics'){ drawSparkline('chartSignups', [1,2,1,3,4,6,5], '#0EA5E9'); drawSparkline('chartReferrals', [0,1,1,2,2,3,4], '#F59E0B'); }
+      }
+
+      // --- Firebase placeholders ---
+      // const firebaseConfig = { /* keys */ };
+      // firebase.initializeApp(firebaseConfig);
+      // const db = firebase.firestore();
+      // firebase.auth().onAuthStateChanged(user => { /* handle auth */ });
+      // await db.collection('tournaments').doc(tournId).set({ ... }, { merge: true });
+
+      function init(){
+        // events
+        $$('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.viewTarget)));
+        $('#btnCreateT').addEventListener('click', ()=> openTModal());
+        $('#btnCreateT2').addEventListener('click', ()=> openTModal());
+        $('[data-close-t]').addEventListener('click', closeTModal);
+        $('#btnSaveT').addEventListener('click', saveTournament);
+        $('#btnDeleteT').addEventListener('click', deleteTournament);
+        $('#searchT').addEventListener('input', renderTournaments);
+        $('#filterStatus').addEventListener('change', renderTournaments);
+        $('#searchP').addEventListener('input', renderPlayers);
+
+        switchView('dashboard');
+      }
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
+</html>
+
