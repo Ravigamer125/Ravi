@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Free Fire Tournaments — Player App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg-primary:   #F8FAFC;
+        --bg-secondary: #E2E8F0;
+        --text-dark:    #1E293B;
+        --accent-blue:  #2563EB;
+        --accent-gold:  #FBBF24;
+        --accent-red:   #DC2626;
+        --border:       #CBD5E1;
+        --radius: 14px;
+      }
+
+      html, body {
+        height: 100%;
+        background: var(--bg-primary);
+        color: var(--text-dark);
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        margin: 0;
+      }
+
+      .app {
+        max-width: 520px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: saturate(140%) blur(6px);
+        background: color-mix(in srgb, var(--bg-primary) 75%, white);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .brand-logo {
+        width: 28px; height: 28px;
+      }
+      .brand-title {
+        font-family: "Russo One", system-ui;
+        letter-spacing: 0.5px;
+        font-size: 18px;
+      }
+
+      .wallet-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: white;
+        font-weight: 600;
+      }
+      .btn, button {
+        appearance: none;
+        border: none;
+        outline: none;
+        background: var(--accent-blue);
+        color: white;
+        padding: 12px 14px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: transform .06s ease, background .2s ease;
+      }
+      .btn:active { transform: translateY(1px) scale(.99); }
+      .btn.secondary { background: var(--text-dark); color: white; }
+      .btn.ghost { background: transparent; color: var(--text-dark); border: 1px solid var(--border); }
+      .btn.warn { background: var(--accent-red); }
+      .btn.gold { background: var(--accent-gold); color: #1E1E1E; }
+
+      .content { padding: 12px 12px 72px; }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin: 12px 0;
+      }
+      .hero h1 {
+        font-family: "Russo One", system-ui;
+        margin: 0 0 6px 0;
+        font-size: 20px;
+      }
+      .hero p { margin: 0 0 12px 0; color: #334155; }
+
+      .card-grid { display: grid; gap: 10px; }
+      .card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+      .meta { color: #475569; font-size: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+      .badge { background: var(--bg-secondary); padding: 4px 8px; border-radius: 999px; font-weight: 600; font-size: 11px; }
+
+      .tabs { display: flex; gap: 8px; margin: 8px 0 12px; }
+      .tab {
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: white;
+        border: 1px solid var(--border);
+        font-weight: 600;
+        color: #334155;
+      }
+      .tab.active { background: var(--accent-blue); color: white; border-color: transparent; }
+
+      .section-title { font-weight: 800; margin: 16px 4px 8px; letter-spacing: .2px; }
+
+      .share-row { display: flex; gap: 8px; }
+      .input {
+        appearance: none;
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: white;
+        font-weight: 600;
+      }
+
+      .profile {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+      .avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-secondary); display: grid; place-items: center; font-weight: 800; }
+
+      /* Bottom nav */
+      .bottom-nav {
+        position: sticky;
+        bottom: 0;
+        z-index: 30;
+        background: white;
+        border-top: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .nav-btn { padding: 10px 4px; background: transparent; border-radius: 0; color: #334155; font-weight: 700; }
+      .nav-btn.active { color: var(--accent-blue); }
+
+      /* Modals */
+      .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.5); display: none; align-items: end; justify-content: center; z-index: 50; }
+      .modal { background: white; width: 100%; max-width: 520px; border-top-left-radius: 16px; border-top-right-radius: 16px; padding: 16px; border: 1px solid var(--border); }
+      .modal.show { display: flex; }
+      .modal .row { display: grid; gap: 8px; margin: 10px 0; }
+
+      @media (min-width: 560px) {
+        .hero { grid-template-columns: 1fr auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app">
+      <header>
+        <div class="topbar">
+          <div class="brand">
+            <svg class="brand-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M3 12l4-8 4 8-4 8-4-8zm10 0l4-8 4 8-4 8-4-8z" fill="currentColor"/>
+            </svg>
+            <div class="brand-title">Free Fire Tournaments</div>
+          </div>
+          <div class="wallet-pill" id="walletPill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 7a3 3 0 013-3h12a3 3 0 013 3v2h-7a3 3 0 000 6h7v2a3 3 0 01-3 3H6a3 3 0 01-3-3V7z" fill="#0ea5e9"/><circle cx="16" cy="12" r="2" fill="white"/></svg>
+            <span id="walletBalance">₹0</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- Home -->
+        <section id="view-home" data-view>
+          <div class="hero">
+            <div>
+              <h1>Free Fire Tournaments</h1>
+              <p>Daily rooms, instant payouts, play with pros. Join live matches now.</p>
+              <button class="btn gold" id="ctaPlayNow">Play Now</button>
+            </div>
+            <svg width="96" height="96" viewBox="0 0 100 100" aria-hidden="true">
+              <circle cx="50" cy="50" r="46" fill="#DBEAFE" stroke="#93C5FD"/>
+              <path d="M35 65L65 50 35 35v30z" fill="#2563EB"/>
+            </svg>
+          </div>
+
+          <div>
+            <div class="section-title">Live Tournaments</div>
+            <div id="homeLiveGrid" class="card-grid"></div>
+          </div>
+        </section>
+
+        <!-- Tournaments -->
+        <section id="view-tournaments" data-view hidden>
+          <div class="tabs">
+            <button class="tab active" data-tab="live">Live</button>
+            <button class="tab" data-tab="upcoming">Upcoming</button>
+            <button class="tab" data-tab="past">Past</button>
+          </div>
+          <div id="tournGrid" class="card-grid"></div>
+        </section>
+
+        <!-- Refer & Earn -->
+        <section id="view-refer" data-view hidden>
+          <div class="card">
+            <div>
+              <div class="section-title">Refer & Earn</div>
+              <div class="meta">Share your code and earn credits for each signup.</div>
+              <div class="row">
+                <input id="refCode" class="input" readonly value="REF-XXXXXX" />
+              </div>
+              <div class="share-row">
+                <button class="btn" id="btnShareWA">WhatsApp</button>
+                <button class="btn" id="btnShareTG">Telegram</button>
+                <button class="btn ghost" id="btnCopyLink">Copy Link</button>
+              </div>
+            </div>
+            <div style="display:grid;gap:6px;align-content:start">
+              <div class="badge">Earned</div>
+              <div style="font-weight:800;font-size:18px" id="earnedCredits">₹0</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Profile -->
+        <section id="view-profile" data-view hidden>
+          <div class="profile">
+            <div class="avatar" id="avatar">GG</div>
+            <div>
+              <div style="font-weight:800" id="profileName">Guest Gamer</div>
+              <div class="meta">FF UID: <span id="profileUID">000000000</span></div>
+            </div>
+            <button class="btn" id="btnTopup">Top-up</button>
+          </div>
+
+          <div class="section-title">My Registrations</div>
+          <div id="myRegs" class="card-grid"></div>
+        </section>
+      </main>
+
+      <nav class="bottom-nav">
+        <button class="nav-btn active" data-view-target="home">Home</button>
+        <button class="nav-btn" data-view-target="tournaments">Tournaments</button>
+        <button class="nav-btn" data-view-target="refer">Refer</button>
+        <button class="nav-btn" data-view-target="profile">Profile</button>
+      </nav>
+
+      <!-- Registration Modal -->
+      <div class="modal-backdrop" id="registerModal">
+        <div class="modal">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:800;">Join Tournament</div>
+            <button class="btn ghost" data-close-register>Close</button>
+          </div>
+          <div class="row">
+            <label>Name</label>
+            <input id="regName" class="input" placeholder="Your in-game name" />
+          </div>
+          <div class="row">
+            <label>Free Fire UID</label>
+            <input id="regUID" class="input" placeholder="123456789" />
+          </div>
+          <div class="row">
+            <button class="btn" id="btnConfirmJoin">Pay & Join</button>
+            <div class="meta">Entry fee: <span id="regEntry">₹0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top-up Modal -->
+      <div class="modal-backdrop" id="topupModal">
+        <div class="modal">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:800;">Wallet Top-up</div>
+            <button class="btn ghost" data-close-topup>Close</button>
+          </div>
+          <div class="row">
+            <label>Amount</label>
+            <input id="topupAmount" type="number" class="input" placeholder="100" />
+          </div>
+          <div class="row">
+            <button class="btn" id="btnTopupPay">Pay</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Simple app state (mock until wired to backend) ---
+      const state = {
+        user: {
+          id: 'userId123',
+          name: 'Guest Gamer',
+          uid: '987654321',
+          walletBalance: 300,
+          referrer: null,
+          referralCode: 'REF-AB12CD',
+          earnedCredits: 50,
+          registrations: []
+        },
+        tournaments: [
+          { id: 't1', title: 'Daily Clash #201', matchTime: new Date(Date.now() + 60*60*1000).toISOString(), map: 'Bermuda', prize: 1000, entryFee: 50, maxPlayers: 100, joined: 76, status: 'live' },
+          { id: 't2', title: 'Duo Faceoff', matchTime: new Date(Date.now() + 3*60*60*1000).toISOString(), map: 'Kalahari', prize: 800, entryFee: 40, maxPlayers: 50, joined: 49, status: 'upcoming' },
+          { id: 't3', title: 'Pro League Qualifier', matchTime: new Date(Date.now() - 24*60*60*1000).toISOString(), map: 'Purgatory', prize: 3000, entryFee: 100, maxPlayers: 100, joined: 100, status: 'past' }
+        ],
+        selectedTournament: null,
+        activeTab: 'live',
+        activeView: 'home'
+      };
+
+      // --- DOM helpers ---
+      const $ = (sel, root=document) => root.querySelector(sel);
+      const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+      const formatTime = iso => new Date(iso).toLocaleString();
+      const currency = v => `₹${Number(v).toLocaleString('en-IN')}`;
+
+      // --- Render functions ---
+      function renderWallet() {
+        $('#walletBalance').textContent = currency(state.user.walletBalance);
+      }
+
+      function renderReferral() {
+        $('#refCode').value = state.user.referralCode;
+        $('#earnedCredits').textContent = currency(state.user.earnedCredits);
+      }
+
+      function cardForTournament(t) {
+        const wrap = document.createElement('div');
+        wrap.className = 'card';
+        wrap.innerHTML = `
+          <div>
+            <div style="font-weight:800">${t.title}</div>
+            <div class="meta">
+              <span class="badge">${t.map}</span>
+              <span>${formatTime(t.matchTime)}</span>
+              <span>Prize: <b>${currency(t.prize)}</b></span>
+              <span>Players: ${t.joined}/${t.maxPlayers}</span>
+            </div>
+          </div>
+          <div style="display:grid;gap:8px;align-content:start">
+            <div class="badge">${currency(t.entryFee)} fee</div>
+            <button class="btn" data-join="${t.id}">Join</button>
+          </div>
+        `;
+        wrap.querySelector('[data-join]')?.addEventListener('click', () => openRegisterModal(t));
+        return wrap;
+      }
+
+      function renderHome() {
+        const grid = $('#homeLiveGrid');
+        grid.innerHTML = '';
+        state.tournaments.filter(t => t.status === 'live').forEach(t => grid.appendChild(cardForTournament(t)));
+      }
+
+      function renderTournaments() {
+        const grid = $('#tournGrid');
+        grid.innerHTML = '';
+        state.tournaments.filter(t => t.status === state.activeTab).forEach(t => grid.appendChild(cardForTournament(t)));
+        $$('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === state.activeTab));
+      }
+
+      function renderProfile() {
+        $('#profileName').textContent = state.user.name;
+        $('#profileUID').textContent = state.user.uid;
+        $('#avatar').textContent = (state.user.name || 'GG').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+        const regs = $('#myRegs');
+        regs.innerHTML = '';
+        state.user.registrations.forEach(r => {
+          const t = state.tournaments.find(x => x.id === r.tournId);
+          if (!t) return;
+          const c = document.createElement('div');
+          c.className = 'card';
+          c.innerHTML = `
+            <div>
+              <div style="font-weight:800">${t.title}</div>
+              <div class="meta">${formatTime(t.matchTime)} · ${t.map}</div>
+            </div>
+            <div style="display:grid;gap:8px;align-content:start">
+              <button class="btn ghost" data-cancel="${t.id}">Cancel</button>
+            </div>
+          `;
+          c.querySelector('[data-cancel]')?.addEventListener('click', () => cancelRegistration(t.id));
+          regs.appendChild(c);
+        });
+      }
+
+      function switchView(view) {
+        state.activeView = view;
+        $$('[data-view]').forEach(v => v.hidden = true);
+        $(`#view-${view}`).hidden = false;
+        $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.viewTarget === view));
+        // Lazy listeners: render only when visible
+        if (view === 'home') renderHome();
+        if (view === 'tournaments') renderTournaments();
+        if (view === 'refer') renderReferral();
+        if (view === 'profile') renderProfile();
+      }
+
+      // --- Modals ---
+      function openRegisterModal(t) {
+        state.selectedTournament = t;
+        $('#regEntry').textContent = currency(t.entryFee);
+        $('#registerModal').classList.add('show');
+      }
+      function closeRegisterModal() { $('#registerModal').classList.remove('show'); }
+      function openTopupModal() { $('#topupModal').classList.add('show'); }
+      function closeTopupModal() { $('#topupModal').classList.remove('show'); }
+
+      // --- Actions ---
+      async function processPayment(amount) {
+        // Payment gateway placeholder (Razorpay/Stripe)
+        // Integrate SDK here; resolve on success, reject on failure
+        console.log('Processing payment', amount);
+        await new Promise(r => setTimeout(r, 800));
+        // Optional: show Lottie success
+        lazyLoadLottie().then(() => {
+          // demo only
+          console.log('Lottie ready');
+        });
+        return { id: 'pay_' + Math.random().toString(36).slice(2) };
+      }
+
+      async function joinTournament(tournId, userId) {
+        const t = state.tournaments.find(x => x.id === tournId);
+        if (!t) return alert('Tournament not found');
+        if (state.user.walletBalance < t.entryFee) {
+          const pay = confirm('Insufficient balance. Top-up now?');
+          if (pay) openTopupModal();
+          return;
+        }
+        // Deduct and record (mock)
+        state.user.walletBalance -= t.entryFee;
+        state.user.registrations.push({ tournId, timestamp: Date.now() });
+        t.joined = Math.min(t.maxPlayers, t.joined + 1);
+        renderWallet();
+        renderProfile();
+        renderHome();
+        renderTournaments();
+        closeRegisterModal();
+        alert('Successfully joined!');
+        // Backend placeholder:
+        // await processPayment(t.entryFee);
+        // await db.collection('tournaments').doc(tournId).collection('registrations').add({ userId, timestamp: Date.now() });
+        // await db.collection('users').doc(userId).update({ walletBalance: state.user.walletBalance });
+      }
+
+      function cancelRegistration(tournId) {
+        const idx = state.user.registrations.findIndex(r => r.tournId === tournId);
+        if (idx !== -1) state.user.registrations.splice(idx, 1);
+        renderProfile();
+      }
+
+      async function topup(amount) {
+        if (!amount || amount <= 0) return;
+        await processPayment(amount);
+        state.user.walletBalance += Number(amount);
+        renderWallet();
+        closeTopupModal();
+      }
+
+      // --- Share utilities ---
+      function share(message, url) {
+        if (navigator.share) {
+          navigator.share({ text: message, url }).catch(()=>{});
+        } else {
+          prompt('Copy this link', url);
+        }
+      }
+
+      // --- Lazy load Lottie only when needed ---
+      let lottieLoaded = false;
+      async function lazyLoadLottie() {
+        if (lottieLoaded) return window.lottie;
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js';
+          s.async = true;
+          s.onload = () => { lottieLoaded = true; resolve(); };
+          s.onerror = reject;
+          document.body.appendChild(s);
+        });
+        return window.lottie;
+      }
+
+      // --- Firebase placeholders ---
+      // const firebaseConfig = { /* keys */ };
+      // firebase.initializeApp(firebaseConfig);
+      // const db = firebase.firestore();
+      // firebase.auth().onAuthStateChanged(user => { /* update UI */ });
+
+      // --- Init & events ---
+      function init() {
+        renderWallet();
+        renderHome();
+        renderReferral();
+        renderProfile();
+
+        // Bottom nav
+        $$('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.viewTarget)));
+        // Tabs
+        $$('.tab').forEach(t => t.addEventListener('click', () => { state.activeTab = t.dataset.tab; renderTournaments(); }));
+        // CTA
+        $('#ctaPlayNow').addEventListener('click', () => { switchView('tournaments'); state.activeTab = 'live'; renderTournaments(); });
+        // Modals
+        $('[data-close-register]').addEventListener('click', closeRegisterModal);
+        $('[data-close-topup]').addEventListener('click', closeTopupModal);
+        $('#btnConfirmJoin').addEventListener('click', () => {
+          const name = $('#regName').value.trim();
+          const uid = $('#regUID').value.trim();
+          if (name) state.user.name = name;
+          if (uid) state.user.uid = uid;
+          renderProfile();
+          joinTournament(state.selectedTournament.id, state.user.id);
+        });
+        $('#btnTopup').addEventListener('click', openTopupModal);
+        $('#btnTopupPay').addEventListener('click', () => topup(Number($('#topupAmount').value)));
+
+        // Share
+        const shareMessage = 'Join me on Free Fire tourneys! Use my code:';
+        const link = location.origin + location.pathname + '?ref=' + state.user.referralCode;
+        $('#btnShareWA').addEventListener('click', () => share(`${shareMessage} ${state.user.referralCode}`, link));
+        $('#btnShareTG').addEventListener('click', () => share(`${shareMessage} ${state.user.referralCode}`, link));
+        $('#btnCopyLink').addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(link); alert('Link copied'); } catch { share(shareMessage, link); }
+        });
+
+        // Read referral from URL
+        const params = new URLSearchParams(location.search);
+        const ref = params.get('ref');
+        if (ref) state.user.referrer = ref;
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
+</html>
+
