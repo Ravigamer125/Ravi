@@ -1,0 +1,25 @@
+{
+  "teams": [
+    {
+      "id": "AUS",
+      "name": "Australia",
+      "shortName": "AUS",
+      "country": "Australia",
+      "players": []
+    },
+    {
+      "id": "IND",
+      "name": "India",
+      "shortName": "IND",
+      "country": "India",
+      "players": []
+    },
+    {
+      "id": "ENG",
+      "name": "England",
+      "shortName": "ENG",
+      "country": "England",
+      "players": []
+    }
+  ]
+}
